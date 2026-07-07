@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DeckBoss is a free, voice-first fishing logbook that works offline. No account. No DeckBoss server holds your data. Syncs to your own Google Drive, R2, Oracle, or .zip.">
+  <title>DeckBoss — Voice-first fishing logbook, works offline, free</title>
+  <meta name="theme-color" content="#0E1A1C">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+/*
+  family/tokens.css
+  -------------------------------------------------------------------
+  Shared design tokens for the PurplePincher domain family.
+
+  The first block (`:root` ground palette + type system) is extracted
+  verbatim from purplepincher-landing-reference/src/landing.html (the
+  `:root` at lines 13-27). It is the fixed visual baseline for every
+  family site; do not edit it here without also editing the reference.
+
+  The second block (per-site accent variables) names the additional
+  accents from the Round 1 plan (ROUND_1_glm.md, Section 2 table).
+  Each family site overrides `--claw` with the one accent it has chosen
+  (e.g. deckboss.net writes `--claw: var(--antifoul);` in its own
+  site-level `:root`). The variables below are defined so the swap is
+  by name, not by magic hex.
+
+  Pair with family/base.css. Inline at build time; never fetch at
+  runtime. See family/README.md.
+*/
+
+:root {
+  /* --- ground palette + type system (verbatim from landing.html) --- */
+  --ink: #0E1A1C;
+  --ink-deep: #081113;
+  --shell: #F0E9D8;
+  --shell-dim: #C9C0AB;
+  --claw: #A8548C;
+  --claw-deep: #7A3B5E;
+  --lattice: #5FB4C7;
+  --lattice-dim: #3F8FA3;
+  --hardened: #D98B54;
+  --line: rgba(240, 233, 216, 0.14);
+  --display: "Fraunces", Georgia, serif;
+  --body: "IBM Plex Sans", -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", "SF Mono", monospace;
+
+  /* --- per-family-site accents (ROUND_1_glm.md Section 2 table) ---
+     Each site swaps --claw for one of these in its own :root. They are
+     defined here so the swap reads by name. Sites that do not use a
+     given accent simply ignore it; unused variables cost nothing once
+     inlined. */
+
+  /* deckboss.net — anti-fouling bottom-paint oxide. The most confident
+     accent in the table: a real, specific marine color that reads
+     "working vessel" to anyone who knows boats and "warm, weathered,
+     not corporate" to everyone else. Deliberately avoids marine-blue
+     cliché and AI-startup violet. */
+  --antifoul: #B0533A;
+
+  /* cocapn.com — the water under the hull. A deeper blue-green than
+     purplepincher's cyan lattice, distinct from both --ink and
+     --lattice. cocapn.com is the site *about* the boat, so the accent
+     is the water. Keeps the cool family register while being its own. */
+  --depth: #1F4A5C;
+
+  /* superinstance.ai — warm coral / sand-rose. The softest, warmest
+     accent, for the "soft origin" station of the lifecycle.
+     NOTE: superinstance.ai turned out to already have its own real,
+     different visual identity live on Cloudflare Pages — a green-on-
+     black terminal aesthetic. This variable is therefore likely to go
+     UNUSED for superinstance.ai specifically (that site will probably
+     keep its existing palette rather than adopt the family skeleton).
+     It is kept defined here because ROUND_1_glm.md Section 2 named it;
+     removing it would silently contradict the plan. If superinstance.ai
+     does adopt the family skeleton, --reef is the accent the plan
+     assigns it. */
+  --reef: #D97A5C;
+
+  /* cocapn.ai promotes --lattice (cyan) to primary rather than
+     introducing a new accent variable; no new token needed here.
+     See ROUND_1_glm.md Section 2 table and family/README.md. */
+}
+
+/*
+  family/base.css
+  -------------------------------------------------------------------
+  Shared reset, type scale, and the load-bearing component shapes for
+  the PurplePincher domain family. Extracted and generalized from
+  purplepincher-landing-reference/src/landing.html.
+
+  Purplepincher-specific content text has been removed; the CSS
+  structure and class names are preserved verbatim so any family site
+  can reuse them by writing HTML that uses these classes.
+
+  Depends on the tokens defined in family/tokens.css. Inline both
+  files at build time into each site's <style> block; never fetch at
+  runtime. See family/README.md.
+
+  Components provided (the named load-bearing shapes):
+    .eyebrow                    mono section label
+    .chain / .chain-step        numbered sequence (order carries meaning)
+    .ledger / .ledger-row       registry of named things with tags
+    .demo-card                  interactive-surface shell
+    .bar-list                   numbered criteria list
+*/
+
+/* ---------- reset + base type ---------- */
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--shell);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a { color: var(--lattice); }
+a:focus-visible, button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--lattice);
+  outline-offset: 3px;
+}
+
+::selection { background: var(--claw); color: var(--shell); }
+
+.wrap {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+/* ---------- .eyebrow : mono section label ---------- */
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lattice);
+  margin: 0 0 22px;
+  position: relative;
+}
+
+/* ---------- .chain : a real sequence, numbered because order carries meaning ---------- */
+
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 56px 0 8px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.chain-step {
+  flex: 1 1 220px;
+  padding: 22px 20px 22px 0;
+  border-right: 1px solid var(--line);
+}
+.chain-step:last-child { border-right: none; }
+
+.chain-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--lattice-dim);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.chain-step p {
+  margin: 0;
+  font-size: 0.94rem;
+  color: var(--shell-dim);
+}
+
+.chain-step strong {
+  display: block;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1.05rem;
+  color: var(--shell);
+  margin-bottom: 4px;
+}
+
+/* ---------- .demo-card : interactive-surface shell ----------
+   The outer shell only. Each site's signature surface lives inside
+   (a canvas, a state machine, a logbook replay, etc.) and is built
+   by that site. The grid gives a primary area + a narrow sidebar
+   (readout / controls); override grid-template-columns in site CSS
+   if your surface needs a different interior layout. */
+
+.demo-card {
+  position: relative;
+  margin-top: 36px;
+  background: rgba(8, 17, 19, 0.55);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 28px;
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 28px;
+  align-items: stretch;
+}
+
+@media (max-width: 680px) {
+  .demo-card { grid-template-columns: 1fr; }
+}
+
+/* ---------- .ledger : real accounting, not decoration ---------- */
+
+.ledger {
+  margin-top: 32px;
+  border-top: 1px solid var(--line);
+}
+
+.ledger-row {
+  display: grid;
+  grid-template-columns: 1.4fr 2.4fr auto;
+  gap: 20px;
+  align-items: baseline;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+@media (max-width: 620px) {
+  .ledger-row { grid-template-columns: 1fr; gap: 6px; }
+}
+
+.ledger-row.flagship {
+  background: linear-gradient(90deg, rgba(217,139,84,0.08), transparent 40%);
+}
+
+.ledger-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1.05rem;
+}
+.ledger-name a { color: var(--shell); text-decoration: none; border-bottom: 1px solid var(--line); }
+.ledger-name a:hover { border-color: var(--lattice); color: var(--lattice); }
+
+.ledger-desc { font-size: 0.92rem; color: var(--shell-dim); }
+
+.ledger-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--lattice-dim);
+  white-space: nowrap;
+  text-align: right;
+}
+.ledger-tag.hardened { color: var(--hardened); }
+
+/* ---------- .bar-list : the actual mechanism, plainly ---------- */
+
+.bar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: bar;
+}
+
+.bar-list li {
+  counter-increment: bar;
+  position: relative;
+  padding: 14px 0 14px 40px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.95rem;
+  color: var(--shell-dim);
+}
+.bar-list li::before {
+  content: counter(bar);
+  position: absolute;
+  left: 0;
+  top: 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--lattice-dim);
+  width: 24px;
+}
+.bar-list strong { color: var(--shell); }
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* deckboss.net site-specific CSS. Depends on family/tokens.css + base.css
+   (inlined ahead of this file). Uses --antifoul as the site accent per
+   ROUND_1_glm.md Section 2. DeckBoss is a real, shipped product — no
+   provenance/honesty framing needed here, unlike cocapn.com/cocapn.ai. */
+
+:root {
+  --claw: var(--antifoul);
+}
+
+/* ---------- header ---------- */
+
+.site-header {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 28px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.site-header__byline {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--shell-dim);
+  margin: 0;
+}
+.site-header__byline a { color: var(--lattice); }
+
+.site-nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.site-nav__link {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--shell-dim);
+  text-decoration: none;
+}
+.site-nav__link:hover { color: var(--shell); }
+.site-nav__link--primary {
+  color: var(--claw);
+  font-weight: 600;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 64px 28px 40px;
+}
+
+.hero__title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(2.4rem, 6vw, 3.6rem);
+  margin: 0 0 8px;
+  color: var(--shell);
+}
+
+.hero__tagline {
+  font-size: 1.2rem;
+  color: var(--claw);
+  margin: 0 0 20px;
+  font-family: var(--display);
+  font-style: italic;
+}
+
+.hero__summary {
+  font-size: 1.05rem;
+  color: var(--shell-dim);
+  max-width: 56ch;
+  margin: 0 0 32px;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.button {
+  display: inline-block;
+  padding: 13px 26px;
+  border-radius: 8px;
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+.button--primary {
+  background: var(--claw);
+  color: var(--shell);
+}
+.button--primary:hover { background: var(--claw-deep); }
+.button--secondary {
+  border: 1px solid var(--line);
+  color: var(--shell);
+}
+.button--secondary:hover { border-color: var(--lattice); color: var(--lattice); }
+
+/* ---------- generic section wrapper ---------- */
+
+.section {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 48px 28px;
+  border-top: 1px solid var(--line);
+}
+
+.section__title {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  margin: 0 0 24px;
+  color: var(--shell);
+}
+
+.section__lead {
+  font-size: 1.05rem;
+  color: var(--shell);
+  margin: 0 0 12px;
+}
+
+/* ---------- how-it-works steps ---------- */
+
+.steps {
+  list-style: none;
+  margin: 0 0 36px;
+  padding: 0;
+  counter-reset: step;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 720px) {
+  .steps { grid-template-columns: 1fr; }
+}
+
+.step {
+  counter-increment: step;
+  position: relative;
+  padding-left: 36px;
+}
+.step::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--claw);
+  border: 1px solid var(--claw);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step__title {
+  display: block;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1.05rem;
+  color: var(--shell);
+  margin-bottom: 4px;
+}
+.step__body { margin: 0; color: var(--shell-dim); font-size: 0.94rem; }
+
+/* ---------- feature grid ---------- */
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 720px) {
+  .feature-grid { grid-template-columns: 1fr; }
+}
+
+.feature-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+}
+.feature-card__title {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1rem;
+  margin: 0 0 8px;
+  color: var(--shell);
+}
+.feature-card__body {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--shell-dim);
+}
+
+/* ---------- screenshots ---------- */
+
+.screenshot { margin: 0 0 32px; }
+.screenshot:last-child { margin-bottom: 0; }
+.screenshot__image {
+  width: 100%;
+  max-width: 340px;
+  display: block;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.screenshot__caption {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  color: var(--shell-dim);
+}
+
+/* ---------- your-data checklist ---------- */
+
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.checklist li {
+  padding: 10px 0 10px 28px;
+  border-bottom: 1px solid var(--line);
+  color: var(--shell-dim);
+  font-size: 0.95rem;
+  position: relative;
+}
+.checklist li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--claw);
+}
+
+/* ---------- honesty block ---------- */
+
+.honesty-block p {
+  color: var(--shell-dim);
+  font-size: 0.95rem;
+  margin: 0 0 16px;
+}
+.honesty-block strong { color: var(--shell); }
+
+/* ---------- footer ---------- */
+
+.footer {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 32px 28px 48px;
+  border-top: 1px solid var(--line);
+}
+.footer__links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.footer__links a {
+  font-size: 0.88rem;
+  color: var(--shell-dim);
+  text-decoration: none;
+}
+.footer__links a:hover { color: var(--lattice); }
+
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <p class="site-header__byline">A project of <a href="https://purplepincher.org">PurplePincher</a></p>
+    <nav class="site-nav" aria-label="Primary">
+      <a class="site-nav__link" href="#how-it-works">How it works</a>
+      <a class="site-nav__link" href="#what-it-is-not">What it is not</a>
+      <a class="site-nav__link" href="#beta">Field beta</a>
+      <a class="site-nav__link site-nav__link--primary" href="https://purplepincher.github.io/deckboss/app/">Open app</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <section class="hero" id="hero">
+      <h1 class="hero__title">DeckBoss</h1>
+      <p class="hero__tagline">Voice-first fishing log. No signal needed. Free.</p>
+      <p class="hero__summary">Tap to record. Timestamp, GPS, and transcript happen automatically. Works offline. No account. No DeckBoss server ever holds your logs.</p>
+      <div class="hero__actions">
+        <a class="button button--primary" href="https://purplepincher.github.io/deckboss/app/">Open DeckBoss — Free, No Signup</a>
+        <a class="button button--secondary" href="https://github.com/purplepincher/deckboss">View the code on GitHub</a>
+      </div>
+    </section>
+
+    <section class="section section--how-it-works" id="how-it-works">
+      <h2 class="section__title">How it works</h2>
+      <ol class="steps">
+        <li class="step">
+          <strong class="step__title">Tap the record button.</strong>
+          <p class="step__body">One big button, built for gloves and wet hands. No gestures to fumble.</p>
+        </li>
+        <li class="step">
+          <strong class="step__title">Talk.</strong>
+          <p class="step__body">Say what you caught, where, and how. The transcript is generated automatically.</p>
+        </li>
+        <li class="step">
+          <strong class="step__title">Done.</strong>
+          <p class="step__body">Timestamp and GPS save automatically. Even with zero bars, your capture is stored locally; the transcript catches up when connectivity returns.</p>
+        </li>
+      </ol>
+
+      <div class="feature-grid">
+        <article class="feature-card">
+          <h3 class="feature-card__title">Works offline, by design</h3>
+          <p class="feature-card__body">Zero signal is the normal operating environment on a working boat, not an edge case. Entries queue locally and sync when you get back in range.</p>
+        </article>
+        <article class="feature-card">
+          <h3 class="feature-card__title">Your storage, your rules</h3>
+          <p class="feature-card__body">Sync to your own Google Drive, Cloudflare R2, Oracle Object Storage, or export a plain .zip. No DeckBoss server sits in the middle.</p>
+        </article>
+        <article class="feature-card">
+          <h3 class="feature-card__title">Nothing is deleted</h3>
+          <p class="feature-card__body">Entries are amended or retracted through additive corrections. The original capture stays recoverable.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section section--screenshots" id="screenshots">
+      <h2 class="section__title">What it looks like on deck</h2>
+
+      <figure class="screenshot">
+        <img class="screenshot__image" src="/images/screenshot-record.png" width="780" height="1688" alt="DeckBoss record screen showing a large microphone button and a list of recent entries.">
+        <figcaption class="screenshot__caption">The record screen: one big button. Tap, speak, done.</figcaption>
+      </figure>
+
+      <figure class="screenshot">
+        <img class="screenshot__image" src="/images/screenshot-timeline.png" width="780" height="1688" alt="DeckBoss timeline view listing log entries with date, GPS, and transcript preview.">
+        <figcaption class="screenshot__caption">The timeline: every entry, with date, GPS, and a transcript preview.</figcaption>
+      </figure>
+
+      <figure class="screenshot">
+        <img class="screenshot__image" src="/images/screenshot-entry-detail.png" width="780" height="1688" alt="DeckBoss entry detail screen showing the full transcript, location, and options to amend or retract.">
+        <figcaption class="screenshot__caption">Entry detail: full transcript, location, and the option to amend or retract without losing the original capture.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section section--your-data" id="your-data">
+      <h2 class="section__title">Your data, not ours</h2>
+      <ul class="checklist">
+        <li>No account required.</li>
+        <li>No DeckBoss server ever holds your logs.</li>
+        <li>Cloud sync uses credentials you control in Settings.</li>
+        <li>Open source under the MIT license.</li>
+      </ul>
+    </section>
+
+    <section class="section section--honesty" id="what-it-is-not">
+      <h2 class="section__title">What this is not</h2>
+      <div class="honesty-block">
+        <p><strong>Not a catch-reporting tool.</strong> DeckBoss is a personal log for your own records. It is not a substitute for official or regulatory catch reporting, and it has not been reviewed or certified as evidence-grade for legal or insurance purposes.</p>
+        <p><strong>No hardware, payment, or support SLA.</strong> This is a working beta, not a supported product. Use your own phone. If something breaks, we fix it when we can.</p>
+        <p><strong>Don't bet your real records on it yet.</strong> Week one of the beta asks you to keep your current logging method running in parallel, so a DeckBoss failure costs you nothing.</p>
+      </div>
+    </section>
+
+    <section class="section section--beta" id="beta">
+      <h2 class="section__title">Field beta</h2>
+      <p class="section__lead">We're recruiting 3–5 working boats for a 6–8 week on-the-water test.</p>
+      <p>Participation means a one-time setup session, logging at least once daily in real conditions, and a short daily check-in by call or text. No hardware, no payment, no support SLA.</p>
+      <div class="hero__actions">
+        <a class="button button--primary" href="https://github.com/purplepincher/deckboss/discussions">Get in touch on GitHub</a>
+        <a class="button button--secondary" href="https://github.com/purplepincher/deckboss/blob/main/docs/beta-recruiting/RECRUITING_COLLATERAL.md">Read the full beta details</a>
+      </div>
+      <!-- TODO: Replace the GitHub Discussions link with a real contact email or form before publishing. -->
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <nav aria-label="Footer">
+      <ul class="footer__links">
+        <li><a href="https://github.com/purplepincher/deckboss">GitHub repo</a></li>
+        <li><a href="https://github.com/purplepincher/deckboss/blob/main/docs/USER_GUIDE.md">User guide</a></li>
+        <li><a href="https://github.com/purplepincher/deckboss/blob/main/ARCHITECTURE.md">Architecture</a></li>
+        <li><a href="https://github.com/purplepincher/deckboss/blob/main/LICENSE">MIT license</a></li>
+        <li><a href="https://purplepincher.org">PurplePincher</a></li>
+      </ul>
+    </nav>
+  </footer>
+
+</body>
+</html>
