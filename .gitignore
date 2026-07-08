@@ -3,3 +3,5 @@ node_modules/
 package-lock.json
 src/combined.css
 src/deckboss-content.html
+.dev.vars
+.dev.vars.*

@@ -565,6 +565,100 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 }
 .footer__links a:hover { color: var(--lattice); }
 
+/* ---------- beta signup form ----------
+   Uses only existing family tokens (--ink-deep, --line, --shell,
+   --shell-dim, --lattice, --claw, --body, --mono). The accent-tinted
+   confirmation background is --claw (the site's antifoul accent) at low
+   alpha -- the same pattern .ledger-row.flagship already uses for --hardened. */
+
+.signup-byline {
+  margin: 14px 0 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--shell-dim);
+}
+
+.signup-form {
+  margin-top: 24px;
+  max-width: 620px;
+}
+
+.signup-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 620px) {
+  .signup-form__row { grid-template-columns: 1fr; }
+}
+
+.signup-form__field {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.signup-form__label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--shell-dim);
+  margin-bottom: 6px;
+}
+
+.signup-form__req {
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--claw);
+}
+
+.signup-form__input {
+  width: 100%;
+  font: inherit;
+  font-family: var(--body);
+  font-size: 1rem;
+  color: var(--shell);
+  background: var(--ink-deep);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px 13px;
+  transition: border-color 0.15s ease;
+}
+.signup-form__input::placeholder { color: var(--shell-dim); opacity: 0.6; }
+.signup-form__input:focus {
+  border-color: var(--lattice);
+  outline: 2px solid var(--lattice);
+  outline-offset: 2px;
+}
+
+.signup-form__textarea {
+  resize: vertical;
+  min-height: 84px;
+  display: block;
+}
+
+.signup-form__error {
+  margin: 14px 0 0;
+  color: var(--claw);
+  font-size: 0.92rem;
+}
+
+.signup-confirm {
+  margin-top: 24px;
+  padding: 20px 22px;
+  border: 1px solid var(--claw);
+  border-radius: 12px;
+  background: rgba(176, 83, 58, 0.08);
+}
+.signup-confirm p {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 500;
+  color: var(--shell);
+  font-size: 1.05rem;
+}
+
   </style>
 </head>
 <body>
@@ -666,17 +760,43 @@ a:focus-visible, button:focus-visible, input:focus-visible {
       <h2 class="section__title">Field beta</h2>
       <p class="section__lead">We're recruiting 3–5 working boats for a 6–8 week on-the-water test.</p>
       <p>Participation means a one-time setup session, logging at least once daily in real conditions, and a short daily check-in by call or text. No hardware, no payment, no support SLA.</p>
-      <div class="hero__actions">
-        <a class="button button--primary" href="https://github.com/purplepincher/deckboss/discussions">Get in touch on GitHub</a>
-        <a class="button button--secondary" href="https://github.com/purplepincher/deckboss/blob/main/docs/beta-recruiting/RECRUITING_COLLATERAL.md">Read the full beta details</a>
+      <p class="signup-byline">Captain Casey DiGennaro, F/V Eileen, out of Sitka, Alaska.</p>
+
+      <form class="signup-form" id="beta-signup-form" action="/api/beta-signup" method="post" novalidate>
+        <div class="signup-form__row">
+          <label class="signup-form__field">
+            <span class="signup-form__label">Name <span class="signup-form__req">(required)</span></span>
+            <input class="signup-form__input" type="text" name="name" autocomplete="name" required maxlength="120">
+          </label>
+          <label class="signup-form__field">
+            <span class="signup-form__label">Boat name</span>
+            <input class="signup-form__input" type="text" name="boat" autocomplete="off" maxlength="120">
+          </label>
+        </div>
+        <div class="signup-form__row">
+          <label class="signup-form__field">
+            <span class="signup-form__label">Home port</span>
+            <input class="signup-form__input" type="text" name="homePort" autocomplete="address-level2" maxlength="120">
+          </label>
+          <label class="signup-form__field">
+            <span class="signup-form__label">Contact (email or phone) <span class="signup-form__req">(required)</span></span>
+            <input class="signup-form__input" type="text" name="contact" autocomplete="off" required maxlength="200">
+          </label>
+        </div>
+        <label class="signup-form__field">
+          <span class="signup-form__label">Message (optional)</span>
+          <textarea class="signup-form__input signup-form__textarea" name="message" rows="3" maxlength="2000"></textarea>
+        </label>
+        <div class="hero__actions">
+          <button class="button button--primary" type="submit">Send it</button>
+          <a class="button button--secondary" href="https://github.com/purplepincher/deckboss/blob/main/docs/beta-recruiting/RECRUITING_COLLATERAL.md">Read the full beta details</a>
+        </div>
+        <p class="signup-form__error" id="beta-signup-error" role="alert" hidden></p>
+      </form>
+
+      <div class="signup-confirm" id="beta-signup-confirm" hidden>
+        <p>Got it — Captain Casey DiGennaro (F/V Eileen, Sitka, Alaska) will follow up directly.</p>
       </div>
-      <!--
-        This is genuinely the current contact path, not a placeholder --
-        no separate email or form exists yet. GitHub Discussions works
-        today; it just isn't where most working captains already are.
-        Real fix, when there's time to build it: a plain contact form or
-        email that doesn't require a GitHub account.
-      -->
     </section>
 
   </main>
@@ -694,5 +814,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     </nav>
   </footer>
 
+  <script src="/js/beta-signup.js" defer></script>
 </body>
 </html>

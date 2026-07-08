@@ -9,5 +9,11 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "BETA_SIGNUPS",
+      "id": "2029d51fe0584b7bbd8304211e6dbbd8"
+    }
+  ]
 }
